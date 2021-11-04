@@ -1,0 +1,53 @@
+name: Continuous Deployment
+# Ref: https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions
+# Ref: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+
+on:
+  push:
+    branches:
+      - '*'
+
+env:
+  REGISTRY: docker.io
+  REGISTRY_USER: "technat"
+  IMAGE_NAME: "eatthis/backend"
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repoistory
+        uses: actions/checkout@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ secrets.DOCKER_HUB }}
+
+      - name: Calculate full image url
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: . # Dockerfile in current directoy
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ArgoCD Sync
+        uses: omegion/argocd-app-actions@master
+        with:
+          address: "cd.eatthis.ch"
+          token: ${{ secrets.ARGOCD_TOKEN }}
+          appName: "eatthis.ch-test" 
+
