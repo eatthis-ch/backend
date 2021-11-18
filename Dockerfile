@@ -1,3 +1,4 @@
+# Ref: https://www.adevguide.com/dockerize-java-application-maven-with-dockerfile/
 FROM maven:3-openjdk-11-slim as builder
 
 # Prepare env
