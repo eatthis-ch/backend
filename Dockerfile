@@ -8,21 +8,19 @@ WORKDIR /app
 COPY . .
 
 # Build process
-RUN mvn dependency:go-offline -B
-RUN mvn package
+RUN mvn package -Dmaven.test.skip=true 
 
 ############# Final image #############
 FROM openjdk:11-jre-slim-bullseye
 
 # non-root stuff
-RUN addgroup jre --system --gid 1000
-RUN adduser --system jre --home /home/jre/ --shell /bin/bash --uid 1000 --gid 1000
-USER jre 
-WORKDIR /home/jre/
+RUN addgroup -S spring --system --gid 1000 && adduser -S spring --system -G spring --shell /bin/bash --uid 1000
+USER spring:spring 
+WORKDIR /home/spring
 
 # App binary
 COPY --from=builder /app/target/backend-*.jar backend.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/home/jre/backend.jar"]
+ENTRYPOINT ["java", "-jar", "/home/spring/backend.jar"]
