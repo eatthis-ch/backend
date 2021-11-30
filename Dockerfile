@@ -1,36 +1,28 @@
-FROM docker.io/openjdk:8-jdk-alpine AS builder
+# Ref: https://www.adevguide.com/dockerize-java-application-maven-with-dockerfile/
+FROM maven:3-openjdk-11-slim as builder
 
-ENV MAVEN_VERSION 3.5.4
-ENV MAVEN_HOME /usr/lib/mvn
-ENV PATH $MAVEN_HOME/bin:$
+# Prepare env
 WORKDIR /app
 
-# Get maven
-RUN wget http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
- tar -zxvf apache-maven-$MAVEN_VERSION-bin.tar.gz && \
- rm apache-maven-$MAVEN_VERSION-bin.tar.gz && \
- mv apache-maven-$MAVEN_VERSION $MAVEN_HOME
+# Get Source Code into image
+COPY . .
 
-# Get dependencies
-COPY pom.xml .
-RUN mvn install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+# Build process
+RUN mvn dependency:go-offline -B
+RUN mvn package
 
 ############# Final image #############
-FROM docker.io/openjdk:8-jdk-alpine
-LABEL MAINTAINER technat@technat.ch
+FROM openjdk:11-jre-slim-bullseye
 
-### non-root stuff
-RUN addgroup -S spring && adduser -S pring -G spring -h /app
-USER spring:spring
-WORKDIR /app
+# non-root stuff
+RUN addgroup jre --system --gid 1000
+RUN adduser --system jre --home /home/jre/ --shell /bin/bash --uid 1000 --gid 1000
+USER jre 
+WORKDIR /home/jre/
 
-## App 
-ARG DEPENDENCY=/app/target/dependency
-COPY --from=builder ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=builder ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=builder ${DEPENDENCY}/BOOT-INF/classes /app
+# App binary
+COPY --from=builder /app/target/backend-*.jar backend.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","backend.Application"]
+ENTRYPOINT ["java", "-jar", "/home/jre/backend.jar"]
