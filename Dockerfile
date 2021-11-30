@@ -14,7 +14,8 @@ RUN mvn package -Dmaven.test.skip=true
 FROM openjdk:11-jre-slim-bullseye
 
 # non-root stuff
-RUN addgroup -S spring --system --gid 1000 && adduser -S spring --system -G spring --shell /bin/bash --uid 1000
+RUN addgroup spring --system --gid 1000
+RUN adduser spring --system  --home /home/spring --shell /bin/bash --uid 1000 --gid 1000
 USER spring:spring 
 WORKDIR /home/spring
 

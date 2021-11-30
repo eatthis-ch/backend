@@ -18,7 +18,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repoistory
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Log in to Container Registry
