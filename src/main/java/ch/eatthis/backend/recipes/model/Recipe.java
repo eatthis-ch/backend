@@ -6,13 +6,13 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "recipes")
+@Table(name = "recipe")
 public class Recipe {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private String id;
     private String title;
+    private String description;
     private String image_id;
     private int energy_cal;
     private int protein_g;

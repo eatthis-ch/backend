@@ -1,9 +1,12 @@
 package ch.eatthis.backend.recipes;
 
 import ch.eatthis.backend.recipes.model.Recipe;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
+import java.util.List;
+
+public interface RecipeRepository {
+
+    List<Recipe> getRecipeBetweenRange(int minimumCal, int maximumCal);
+
+
 }

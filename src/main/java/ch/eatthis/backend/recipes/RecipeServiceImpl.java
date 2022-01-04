@@ -28,7 +28,7 @@ public class RecipeServiceImpl implements RecipeService {
         } else {
             neededRecipes = numberOfRecipes.orElse(5);
         }
-        List<Recipe> allRecipes = usedRecipes.map(this::filterUsedRecipes).orElseGet(this.recipeRepository::findAll);
+        List<Recipe> allRecipes = new ArrayList<>(); // usedRecipes.map(this::filterUsedRecipes).orElseGet(this.recipeRepository::findAll);
         // TODO: Throw exception if no recipes are getting loaded
         List<Recipe> selectedRecipes = new ArrayList<>();
         for (int i = 1; i < neededRecipes; i++) {
@@ -40,10 +40,10 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private List<Recipe> filterUsedRecipes(String[] usedRecipes) {
-        List<Recipe> allRecipes = this.recipeRepository.findAll();
+        List<Recipe> allRecipes = new ArrayList<>(); // this.recipeRepository.findAll();
         Iterator<Recipe> iterator = allRecipes.iterator();
         for (String usedRecipe : usedRecipes) {
-            int recipeId = Integer.parseInt(usedRecipe);
+            String recipeId = usedRecipe;
             while (iterator.hasNext()) {
                 Recipe recipe = iterator.next();
                 if (recipe.getId() == recipeId) {
