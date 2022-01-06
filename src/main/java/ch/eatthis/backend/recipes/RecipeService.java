@@ -13,4 +13,6 @@ public interface RecipeService {
 
     List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes);
 
+    String castToString(String[] a);
+
 }
