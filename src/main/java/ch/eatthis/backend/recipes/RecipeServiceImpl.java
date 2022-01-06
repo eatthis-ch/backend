@@ -4,7 +4,10 @@ import ch.eatthis.backend.recipes.model.Recipe;
 import ch.eatthis.backend.recipes.model.RecipeModule;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
@@ -38,11 +41,18 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
-        List<Recipe> recipes = this.recipeRepository.getAll();
-        if (numberOfRecipes.orElse(5) < recipes.size()) {
-            recipes.subList(numberOfRecipes.orElse(5), recipes.size()).clear();
+        List<Recipe> allRecipes = this.recipeRepository.getAll();
+        List<Recipe> randomList = new ArrayList<>();
+        if (numberOfRecipes.orElse(5) < allRecipes.size()) {
+            Random random = new Random();
+            for (int i = 0; i < numberOfRecipes.orElse(5); i++) {
+                int index = random.nextInt(allRecipes.size());
+                randomList.add(allRecipes.get(index));
+            }
+        } else {
+            randomList = allRecipes;
         }
-        return recipes;
+        return randomList;
     }
 
     private List<Recipe> getUsedRecipes(String[] usedRecipesArray) {
@@ -58,6 +68,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     /**
      * Checks if the proportions are correct
+     *
      * @param recipeModule
      * @param recipe
      * @return Returns true if the proportions are correct and false if they aren't
@@ -82,6 +93,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     /**
      * Generated all recipes except the last one
+     *
      * @param cal
      * @param recipesToGenerate Number of recipes to generate starting by 1
      * @return
