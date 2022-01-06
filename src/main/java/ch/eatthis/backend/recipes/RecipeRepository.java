@@ -8,5 +8,9 @@ public interface RecipeRepository {
 
     List<Recipe> getRecipeBetweenRange(int minimumCal, int maximumCal);
 
+    List<Recipe> getAll();
+
+    Recipe getRecipe(String id);
+
 
 }

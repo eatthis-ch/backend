@@ -28,10 +28,14 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping
+    @GetMapping("/generate")
     public List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes) {
-        // Returns 5 by default
-        return recipeService.generateRecipes(usedRecipes, numberOfRecipes);
+        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes);
+    }
+
+    @GetMapping
+    public List<Recipe> getAll() {
+        return this.recipeService.getAllRecipes();
     }
 
 }

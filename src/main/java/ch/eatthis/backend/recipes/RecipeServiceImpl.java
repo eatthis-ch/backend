@@ -1,6 +1,7 @@
 package ch.eatthis.backend.recipes;
 
 import ch.eatthis.backend.recipes.model.Recipe;
+import ch.eatthis.backend.recipes.model.RecipeModule;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,41 +18,54 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes) {
-        int neededRecipes = 0;
-        if (usedRecipes.isPresent()) {
-            neededRecipes = usedRecipes.get().length - numberOfRecipes.orElse(5);
-            if (neededRecipes < 1) {
-                // TODO: Add own conflict exception
-                throw new RuntimeException();
-            }
-        } else {
-            neededRecipes = numberOfRecipes.orElse(5);
+    public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes) {
+        int recipesNumber = numberOfRecipes.orElse(5);
+        List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
+        if (recipesNumber <= usedRecipes.size()) {
+            return usedRecipes;
         }
-        List<Recipe> allRecipes = new ArrayList<>(); // usedRecipes.map(this::filterUsedRecipes).orElseGet(this.recipeRepository::findAll);
-        // TODO: Throw exception if no recipes are getting loaded
-        List<Recipe> selectedRecipes = new ArrayList<>();
-        for (int i = 1; i < neededRecipes; i++) {
-            int index = random.nextInt(allRecipes.size());
-            selectedRecipes.add(allRecipes.get(index));
-            allRecipes.remove(index);
-        }
-        return selectedRecipes;
+        RecipeModule recipeModule = new RecipeModule(usedRecipes);
+        List<Recipe> generatedRecipes = new ArrayList<>();
+
+
+        return this.recipeRepository.getAll();
     }
 
-    private List<Recipe> filterUsedRecipes(String[] usedRecipes) {
-        List<Recipe> allRecipes = new ArrayList<>(); // this.recipeRepository.findAll();
-        Iterator<Recipe> iterator = allRecipes.iterator();
-        for (String usedRecipe : usedRecipes) {
-            String recipeId = usedRecipe;
-            while (iterator.hasNext()) {
-                Recipe recipe = iterator.next();
-                if (recipe.getId() == recipeId) {
-                    iterator.remove();
-                    break;
-                }
+    @Override
+    public List<Recipe> getAllRecipes() {
+        return this.recipeRepository.getAll();
+    }
+
+    private List<Recipe> getUsedRecipes(String[] usedRecipesArray) {
+        List<Recipe> usedRecipes = new ArrayList<>();
+        for (String id : usedRecipesArray) {
+            Recipe recipe = this.recipeRepository.getRecipe(id);
+            if (recipe != null) {
+                usedRecipes.add(recipe);
             }
         }
-        return allRecipes;
+        return usedRecipes;
     }
+
+    /**
+     * Checks if the proportions are correct
+     * @param recipeModule
+     * @param recipe
+     * @return
+     */
+    private boolean isInProportion(RecipeModule recipeModule, Recipe recipe) {
+
+
+        return false;
+    }
+
+    /**
+     * Generated all recipes except the last one
+     * @param cal
+     * @return
+     */
+    private List<Recipe> generateRecipes(int cal) {
+        return new ArrayList<>();
+    }
+
 }
