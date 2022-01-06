@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface RecipeRepository {
 
-    List<Recipe> getRecipeBetweenRange(int minimumCal, int maximumCal);
+    List<Recipe> getRecipeBetweenCalRange(int minimumCal, int maximumCal);
 
     List<Recipe> getAll();
 

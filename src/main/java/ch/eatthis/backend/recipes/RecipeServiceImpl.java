@@ -51,20 +51,42 @@ public class RecipeServiceImpl implements RecipeService {
      * Checks if the proportions are correct
      * @param recipeModule
      * @param recipe
-     * @return
+     * @return Returns true if the proportions are correct and false if they aren't
      */
-    private boolean isInProportion(RecipeModule recipeModule, Recipe recipe) {
+    private boolean isInProportion(RecipeModule recipeModule, RecipeModule generatedRecipeModule, Recipe recipe) {
+        RecipeModule mergedRecipeModule = new RecipeModule();
+        mergedRecipeModule.setFat(recipeModule.getFat() + generatedRecipeModule.getFat() + recipe.getFat_g());
+        mergedRecipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + generatedRecipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
+        mergedRecipeModule.setProtein(recipeModule.getProtein() + generatedRecipeModule.getProtein() + recipe.getProtein_g());
 
+        double allModules = mergedRecipeModule.getCarbohydrate() + mergedRecipeModule.getProtein() + mergedRecipeModule.getFat();
+        double percentageCarbohydrate = mergedRecipeModule.getCarbohydrate() / allModules;
+        double percentageFat = mergedRecipeModule.getFat() / allModules;
+        double percentageProtein = mergedRecipeModule.getProtein() / allModules;
 
-        return false;
+        if (!(percentageCarbohydrate >= 0.45 && percentageCarbohydrate <= 0.55)) return false;
+        if (!(percentageFat >= 0.3 && percentageFat <= 0.35)) return false;
+        if (!(percentageProtein >= 0.1 && percentageProtein <= 0.2)) return false;
+
+        return true;
     }
 
     /**
      * Generated all recipes except the last one
      * @param cal
+     * @param recipesToGenerate Number of recipes to generate starting by 1
      * @return
      */
-    private List<Recipe> generateRecipes(int cal) {
+    private List<Recipe> generateRecipes(int cal, int recipesToGenerate) {
+        List<Recipe> generatedRecipes = new ArrayList<>();
+        double averageCalPerRecipe = (double) ((cal / recipesToGenerate) - 50);
+        for (int i = 0; i < recipesToGenerate; i++) {
+            int randomCal = random.nextInt(70);
+            List<Recipe> recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe + randomCal - 15, (int) averageCalPerRecipe + randomCal + 15);
+            int randomIndex = random.nextInt(recipesInRange.size());
+            generatedRecipes.add(recipesInRange.get(randomIndex));
+        }
+
         return new ArrayList<>();
     }
 

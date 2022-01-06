@@ -6,9 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class RecipeRepositoryImpl implements RecipeRepository {
@@ -20,13 +18,16 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<Recipe> getRecipeBetweenRange(int minimumCal, int maximumCal) {
-        return null;
+    public List<Recipe> getRecipeBetweenCalRange(int minimumCal, int maximumCal) {
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        mapSqlParameterSource.addValue("lowerValue", minimumCal);
+        mapSqlParameterSource.addValue("higherValue", maximumCal);
+        return this.template.query(RecipeQueries.getRecipeBetweenCalString, mapSqlParameterSource, new RecipeMapper());
     }
 
     @Override
     public List<Recipe> getAll() {
-        return this.template.query(RecipeQueries.getAll, new RecipeMapper());
+        return this.template.query(RecipeQueries.allRecipes, new RecipeMapper());
     }
 
     @Override
