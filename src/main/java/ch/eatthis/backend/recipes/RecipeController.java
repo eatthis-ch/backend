@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,8 +30,9 @@ public class RecipeController {
     }
 
     @GetMapping("/generate")
-    public List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes) {
-        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes);
+    public List<Recipe> generateRecipes(@RequestParam(required = false) Optional<String[]> usedRecipes, @RequestParam(required = false) Optional<Integer> numberOfRecipes, @RequestParam() Optional<Integer> calories) {
+//        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes);
+        return this.recipeService.getNumberOfRecipes(numberOfRecipes);
     }
 
     @GetMapping

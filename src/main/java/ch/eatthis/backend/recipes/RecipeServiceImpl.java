@@ -36,6 +36,15 @@ public class RecipeServiceImpl implements RecipeService {
         return this.recipeRepository.getAll();
     }
 
+    @Override
+    public List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
+        List<Recipe> recipes = this.recipeRepository.getAll();
+        if (numberOfRecipes.orElse(5) < recipes.size()) {
+            recipes.subList(numberOfRecipes.orElse(5), recipes.size()).clear();
+        }
+        return recipes;
+    }
+
     private List<Recipe> getUsedRecipes(String[] usedRecipesArray) {
         List<Recipe> usedRecipes = new ArrayList<>();
         for (String id : usedRecipesArray) {

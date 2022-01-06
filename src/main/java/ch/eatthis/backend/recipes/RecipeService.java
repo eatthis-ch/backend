@@ -11,4 +11,6 @@ public interface RecipeService {
 
     List<Recipe> getAllRecipes();
 
+    List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes);
+
 }
