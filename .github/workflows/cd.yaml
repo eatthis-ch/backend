@@ -12,6 +12,7 @@ env:
   REGISTRY: docker.io
   REGISTRY_USER: "technat"
   IMAGE_NAME: "eatthis/backend"
+  NODE_OPTIONS: "--max_old_space_size=4096"
 
 jobs:
   build:
