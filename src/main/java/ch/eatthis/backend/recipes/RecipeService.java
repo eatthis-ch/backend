@@ -9,7 +9,7 @@ public interface RecipeService {
 
     List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes);
 
-    List<Recipe> getAllRecipes();
+    List<Recipe> getAllRecipes(Integer skip);
 
     List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes);
 

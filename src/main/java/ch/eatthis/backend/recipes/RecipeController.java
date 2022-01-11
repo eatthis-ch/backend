@@ -39,8 +39,8 @@ public class RecipeController {
     }
 
     @GetMapping
-    public List<Recipe> getAll() {
-        return this.recipeService.getAllRecipes();
+    public List<Recipe> getAll(@RequestParam() Integer page) {
+        return this.recipeService.getAllRecipes(page);
     }
 
 }

@@ -31,17 +31,19 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> generatedRecipes = new ArrayList<>();
 
 
-        return this.recipeRepository.getAll();
+        return this.recipeRepository.getAll(0, 50);
     }
 
     @Override
-    public List<Recipe> getAllRecipes() {
-        return this.recipeRepository.getAll();
+    public List<Recipe> getAllRecipes(Integer skip) {
+        int pageSize = 50;
+        int offset = skip * pageSize;
+        return this.recipeRepository.getAll(offset, pageSize);
     }
 
     @Override
     public List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
-        List<Recipe> allRecipes = this.recipeRepository.getAll();
+        List<Recipe> allRecipes = this.recipeRepository.getAll(random.nextInt(50) * 50, 50);
         List<Recipe> randomList = new ArrayList<>();
         if (numberOfRecipes.orElse(5) < allRecipes.size()) {
             Random random = new Random();
