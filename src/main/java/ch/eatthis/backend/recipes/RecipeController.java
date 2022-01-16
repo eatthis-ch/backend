@@ -30,12 +30,12 @@ public class RecipeController {
     }
 
     @GetMapping("/generate")
-    public List<Recipe> generateRecipes(@RequestParam(required = false) Optional<String[]> usedRecipes, @RequestParam(required = false) Optional<Integer> numberOfRecipes, @RequestParam() Optional<Integer> calories) {
+    public List<Recipe> generateRecipes(@RequestParam(required = false) Optional<String[]> usedRecipes, @RequestParam(required = false) Optional<Integer> numberOfRecipes, @RequestParam() Integer calories) {
         usedRecipes.ifPresent(strings -> System.out.println(this.recipeService.castToString(strings)));
-        calories.ifPresent(System.out::println);
+        System.out.println(calories);
 
 //        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes);
-        return this.recipeService.getNumberOfRecipes(numberOfRecipes);
+        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes, calories);
     }
 
     @GetMapping

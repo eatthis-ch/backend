@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface RecipeService {
 
-    List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes);
+    List<Recipe> generateRecipes(Optional<String[]> usedRecipes, Optional<Integer> numberOfRecipes, int calories);
 
     List<Recipe> getAllRecipes(Integer skip);
 

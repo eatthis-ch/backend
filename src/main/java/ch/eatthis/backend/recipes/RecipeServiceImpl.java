@@ -21,7 +21,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes) {
+    public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes, int calories) {
         int recipesNumber = numberOfRecipes.orElse(5);
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
         if (recipesNumber <= usedRecipes.size()) {
@@ -31,7 +31,7 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> generatedRecipes = new ArrayList<>();
 
 
-        return this.recipeRepository.getAll(0, 50);
+        return this.generateRecipes(calories, recipesNumber, usedRecipes);
     }
 
     @Override
@@ -119,17 +119,22 @@ public class RecipeServiceImpl implements RecipeService {
      * @param recipesToGenerate Number of recipes to generate starting by 1
      * @return
      */
-    private List<Recipe> generateRecipes(int cal, int recipesToGenerate) {
+    private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate) - 50);
         for (int i = 0; i < recipesToGenerate; i++) {
             int randomCal = random.nextInt(70);
             List<Recipe> recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe + randomCal - 15, (int) averageCalPerRecipe + randomCal + 15);
             int randomIndex = random.nextInt(recipesInRange.size());
-            generatedRecipes.add(recipesInRange.get(randomIndex));
+            Recipe recipe = recipesInRange.get(randomIndex);
+            if (usedRecipes.contains(recipe)) {
+                i--;
+                continue;
+            }
+            generatedRecipes.add(recipe);
         }
 
-        return new ArrayList<>();
+        return generatedRecipes;
     }
 
 }
