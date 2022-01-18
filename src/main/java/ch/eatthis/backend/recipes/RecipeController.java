@@ -30,8 +30,6 @@ public class RecipeController {
     public List<Recipe> generateRecipes(@RequestParam(required = false) Optional<String[]> usedRecipes, @RequestParam(required = false) Optional<Integer> numberOfRecipes, @RequestParam() Integer calories) {
         usedRecipes.ifPresent(strings -> System.out.println(this.recipeService.castToString(strings)));
         System.out.println(calories);
-
-//        return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes);
         return this.recipeService.generateRecipes(usedRecipes, numberOfRecipes, calories);
     }
 
