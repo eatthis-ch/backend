@@ -11,6 +11,8 @@ public interface RecipeService {
 
     List<Recipe> getAllRecipes(Integer skip);
 
+    Recipe getById(String id);
+
     List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes);
 
     String castToString(String[] a);

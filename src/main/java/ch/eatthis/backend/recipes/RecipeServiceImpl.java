@@ -42,6 +42,11 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    public Recipe getById(String id) {
+        return this.recipeRepository.getRecipe(id);
+    }
+
+    @Override
     public List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
         List<Recipe> allRecipes = this.recipeRepository.getAll(random.nextInt(50) * 50, 50);
         List<Recipe> randomList = new ArrayList<>();

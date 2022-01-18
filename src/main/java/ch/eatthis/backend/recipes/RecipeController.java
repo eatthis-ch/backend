@@ -4,10 +4,7 @@ import ch.eatthis.backend.recipes.model.Recipe;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +38,11 @@ public class RecipeController {
     @GetMapping
     public List<Recipe> getAll(@RequestParam() Integer page) {
         return this.recipeService.getAllRecipes(page);
+    }
+
+    @GetMapping("/{id}")
+    public Recipe getById(@PathVariable("id") String id) {
+        return this.recipeService.getById(id);
     }
 
 }
