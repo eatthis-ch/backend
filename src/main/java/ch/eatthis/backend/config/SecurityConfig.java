@@ -18,6 +18,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .permitAll()
                         .mvcMatchers("/api/v1/**")
                         .permitAll()
+                        .mvcMatchers("/actuator/health")
+                        .permitAll()
                         .anyRequest().denyAll());
     }
 
