@@ -26,7 +26,7 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
         System.out.println();
         if (recipesNumber <= usedRecipes.size()) {
-            return usedRecipes;
+            return new ArrayList<>();
         }
         RecipeModule recipeModule = new RecipeModule(usedRecipes);
         List<Recipe> generatedRecipes = new ArrayList<>();
