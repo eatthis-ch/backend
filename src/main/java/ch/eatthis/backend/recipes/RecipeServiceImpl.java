@@ -24,6 +24,7 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes, int calories) {
         int recipesNumber = numberOfRecipes.orElse(5);
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
+        System.out.println();
         if (recipesNumber <= usedRecipes.size()) {
             return usedRecipes;
         }
@@ -127,12 +128,13 @@ public class RecipeServiceImpl implements RecipeService {
     private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate) - 50);
-        for (int i = 0; i < recipesToGenerate; i++) {
+        for (int i = 0; i < recipesToGenerate - usedRecipes.size(); i++) {
             int randomCal = random.nextInt(70);
             List<Recipe> recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe + randomCal - 15, (int) averageCalPerRecipe + randomCal + 15);
             int randomIndex = random.nextInt(recipesInRange.size());
             Recipe recipe = recipesInRange.get(randomIndex);
             if (usedRecipes.contains(recipe)) {
+                System.out.println("Dublicated recipe found!");
                 i--;
                 continue;
             }
