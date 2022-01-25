@@ -16,7 +16,7 @@ import java.util.Optional;
         @ApiResponse(code = 404, message = "Not found"),
         @ApiResponse(code = 409, message = "Conflict")
 })
-@RequestMapping("api/v1/recipes")
+@RequestMapping("v1/recipes")
 public class RecipeController {
 
     private final RecipeService recipeService;
