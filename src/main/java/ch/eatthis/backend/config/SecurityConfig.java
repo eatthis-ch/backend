@@ -16,7 +16,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/configuration/ui", "/swagger-resources", "/swagger-resources/configuration/security", "/configuration/security", "/swagger-ui.html",
                         "/webjars/**", "/favicon.ico", "/**/favicon.ico", "/**/favicon.*")
                         .permitAll()
-                        .mvcMatchers("/api/v1/**")
+                        .mvcMatchers("/v1/**")
                         .permitAll()
                         .mvcMatchers("/actuator/health")
                         .permitAll()
