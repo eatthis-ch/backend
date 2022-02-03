@@ -1,6 +1,10 @@
 alerts:
 - rule: DEPLOYMENT_FAILED
 - rule: DOMAIN_FAILED
+domains:
+- domain: eatthis.ch
+  type: PRIMARY
+  zone: eatthis.ch
 name: eatthis-main
 region: fra
 services:
@@ -33,16 +37,16 @@ services:
   - key: MYSQL_USER
     scope: RUN_AND_BUILD_TIME
     value: eatthis
-  - key: MYSQL_PASS
-    scope: RUN_AND_BUILD_TIME
-    type: SECRET
-    value: EV[1:zYQY3bhtDHOHr1eIyvCD+sgueB2OJKOb:awOJEEnazwp1pmRCoLeJuPnO1R2bBEccClpSfxbZeVs1]
   - key: MYSQL_HOST
     scope: RUN_AND_BUILD_TIME
     value: eatthis-do-user-10658900-0.b.db.ondigitalocean.com
   - key: MYSQL_SSL
     scope: RUN_AND_BUILD_TIME
     value: REQUIRED
+  - key: MYSQL_PASS
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: EV[1:CS0xjtbsYKpeG9iUtWJFX3cn0yz351sb:hKvETi8ARD9jYyliErJEyCQu2613McdVkm3+LfnfZxY=]
   github:
     branch: main
     deploy_on_push: true
@@ -51,7 +55,7 @@ services:
     http_path: /api/actuator/health
   http_port: 8080
   instance_count: 1
-  instance_size_slug: basic-xxs
+  instance_size_slug: basic-xs
   name: backend
   routes:
   - path: /api
