@@ -32,6 +32,9 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> mergedRecipes = generatedRecipes;
         mergedRecipes.addAll(usedRecipes);
         RecipeModule recipeModule = new RecipeModule(mergedRecipes);
+        while (!isInProportion(recipeModule) && generatedRecipes.size() + usedRecipes.size() != recipesNumber) {
+
+        }
 
         return generatedRecipes;
     }
@@ -90,17 +93,58 @@ public class RecipeServiceImpl implements RecipeService {
         mergedRecipeModule.setFat(recipeModule.getFat() + recipe.getFat_g());
         mergedRecipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
         mergedRecipeModule.setProtein(recipeModule.getProtein() + recipe.getProtein_g());
+        return isInProportion(mergedRecipeModule);
+    }
 
-        double allModules = mergedRecipeModule.getCarbohydrate() + mergedRecipeModule.getProtein() + mergedRecipeModule.getFat();
-        double percentageCarbohydrate = mergedRecipeModule.getCarbohydrate() / allModules;
-        double percentageFat = mergedRecipeModule.getFat() / allModules;
-        double percentageProtein = mergedRecipeModule.getProtein() / allModules;
+    /**
+     * Checks if the proportions are correct
+     *
+     * @param recipeModule
+     * @return Returns true if the proportions are correct and false if they aren't
+     */
+    private boolean isInProportion(RecipeModule recipeModule) {
+
+        double allModules = recipeModule.getCarbohydrate() + recipeModule.getProtein() + recipeModule.getFat();
+        double percentageCarbohydrate = recipeModule.getCarbohydrate() / allModules;
+        double percentageFat = recipeModule.getFat() / allModules;
+        double percentageProtein = recipeModule.getProtein() / allModules;
 
         if (!(percentageCarbohydrate >= 0.45 && percentageCarbohydrate <= 0.55)) return false;
         if (!(percentageFat >= 0.3 && percentageFat <= 0.35)) return false;
         if (!(percentageProtein >= 0.1 && percentageProtein <= 0.2)) return false;
 
         return true;
+    }
+
+    /**
+     * Checks if the proportions are correct
+     *
+     * @param recipes
+     * @return Returns true if the proportions are correct and false if they aren't
+     */
+    private boolean isInProportion(List<Recipe> recipes) {
+        RecipeModule recipeModule = new RecipeModule(recipes);
+        return isInProportion(recipeModule);
+    }
+
+    private int calculateModuleDifference(RecipeModule usedRecipeModule, Recipe recipe) {
+        RecipeModule mergedRecipeModule = new RecipeModule();
+        mergedRecipeModule.setProtein(usedRecipeModule.getProtein() + recipe.getProtein_g());
+        mergedRecipeModule.setCarbohydrate(usedRecipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
+        mergedRecipeModule.setFat(usedRecipeModule.getFat() + recipe.getFat_g());
+
+        double allModules = mergedRecipeModule.getCarbohydrate() + mergedRecipeModule.getProtein() + mergedRecipeModule.getFat();
+        double percentageCarbohydrate = mergedRecipeModule.getCarbohydrate() / allModules;
+        double percentageFat = mergedRecipeModule.getFat() / allModules;
+        double percentageProtein = mergedRecipeModule.getProtein() / allModules;
+
+        double overAllDifference = 0;
+        if (percentageCarbohydrate < 0.45) {
+            // Calculate difference and add it to overAllDifference
+        } else if (percentageCarbohydrate > 0.55) {
+            // Calculate difference and add it to overAllDifference
+        }
+        return 0;
     }
 
     /**
@@ -111,6 +155,31 @@ public class RecipeServiceImpl implements RecipeService {
      * @return
      */
     private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
+        List<Recipe> generatedRecipes = new ArrayList<>();
+        if (recipesToGenerate - usedRecipes.size() - 1 >= 1) {
+            generatedRecipes = generateRandomRecipes(cal, recipesToGenerate, usedRecipes);
+        }
+        List<Recipe> mergedRecipes = new ArrayList<>();
+        mergedRecipes.addAll(generatedRecipes);
+        mergedRecipes.addAll(usedRecipes);
+        if (isInProportion(mergedRecipes)) {
+            return generatedRecipes;
+        } else {
+            RecipeModule recipeModule = new RecipeModule();
+            int availableCals = cal;
+            for (Recipe recipe : mergedRecipes) {
+                availableCals-= recipe.getEnergy_cal();
+                recipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
+                recipeModule.setFat(recipeModule.getFat() + recipe.getFat_g());
+                recipeModule.setProtein(recipeModule.getProtein() + recipe.getProtein_g());
+            }
+
+//            Recipe recipe = generatedRecipeForModule(availableCals, )
+        }
+        return generatedRecipes;
+    }
+
+    private List<Recipe> generateRandomRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate));
         List<Recipe> recipesInGeneratedRanged = new ArrayList<>();
@@ -137,6 +206,21 @@ public class RecipeServiceImpl implements RecipeService {
             recipesInGeneratedRanged.clear();
         }
         return generatedRecipes;
+    }
+
+    private Recipe generatedRecipeForModule(int cal, RecipeModule usedRecipeModule) {
+        int randomCal = random.nextInt(70);
+        List<Recipe> repositoryRecipes = this.recipeRepository.getRecipeBetweenCalRange(cal - randomCal, cal + randomCal);
+        Recipe bestResult = null;
+        int currentMinimalDifference = 0;
+        for (Recipe recipe : repositoryRecipes) {
+            if (isInProportion(usedRecipeModule, recipe)) {
+                return recipe;
+            } else {
+
+            }
+        }
+        return bestResult;
     }
 
     private List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
