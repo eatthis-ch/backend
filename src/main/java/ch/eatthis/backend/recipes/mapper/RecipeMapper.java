@@ -16,6 +16,7 @@ public class RecipeMapper implements RowMapper<Recipe> {
                 rs.getString("image_id"),
                 rs.getString("ingredients"),
                 rs.getString("procedure"),
+                rs.getString("source"),
                 rs.getInt("energy_cal"),
                 rs.getInt("protein_g"),
                 rs.getInt("fat_g"),
