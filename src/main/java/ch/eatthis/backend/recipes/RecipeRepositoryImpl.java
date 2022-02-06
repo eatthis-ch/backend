@@ -26,7 +26,7 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     }
 
     @Override
-    public List<Recipe> getAll(Integer skip, Integer pageSize) {
+    public List<Recipe> getAll(int skip, int pageSize) {
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue("pageSize", pageSize);
         mapSqlParameterSource.addValue("offset", skip);
@@ -36,5 +36,10 @@ public class RecipeRepositoryImpl implements RecipeRepository {
     @Override
     public Recipe getRecipe(String id) {
         return this.template.queryForObject(RecipeQueries.getRecipe, new MapSqlParameterSource("id", id), new RecipeMapper());
+    }
+
+    @Override
+    public List<Recipe> getLowerThanRecipes(int cal) {
+        return this.template.query(RecipeQueries.getLowerThanRecipes, new MapSqlParameterSource("cal_value", cal), new RecipeMapper());
     }
 }
