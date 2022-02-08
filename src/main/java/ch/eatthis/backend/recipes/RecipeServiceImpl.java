@@ -24,14 +24,9 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes, int calories) {
         int recipesNumber = numberOfRecipes.orElse(5);
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
-        System.out.println();
         if (recipesNumber <= usedRecipes.size()) {
             return new ArrayList<>();
         }
-        RecipeModule recipeModule = new RecipeModule(usedRecipes);
-        List<Recipe> generatedRecipes = new ArrayList<>();
-
-
         return this.generateRecipes(calories, recipesNumber, usedRecipes);
     }
 
@@ -45,22 +40,6 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipe getById(String id) {
         return this.recipeRepository.getRecipe(id);
-    }
-
-    @Override
-    public List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
-        List<Recipe> allRecipes = this.recipeRepository.getAll(random.nextInt(50) * 50, 50);
-        List<Recipe> randomList = new ArrayList<>();
-        if (numberOfRecipes.orElse(5) < allRecipes.size()) {
-            Random random = new Random();
-            for (int i = 0; i < numberOfRecipes.orElse(5); i++) {
-                int index = random.nextInt(allRecipes.size());
-                randomList.add(allRecipes.get(index));
-            }
-        } else {
-            randomList = allRecipes;
-        }
-        return randomList;
     }
 
     @Override
@@ -100,11 +79,11 @@ public class RecipeServiceImpl implements RecipeService {
      * @param recipe
      * @return Returns true if the proportions are correct and false if they aren't
      */
-    private boolean isInProportion(RecipeModule recipeModule, RecipeModule generatedRecipeModule, Recipe recipe) {
+    private boolean isInProportion(RecipeModule recipeModule, Recipe recipe) {
         RecipeModule mergedRecipeModule = new RecipeModule();
-        mergedRecipeModule.setFat(recipeModule.getFat() + generatedRecipeModule.getFat() + recipe.getFat_g());
-        mergedRecipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + generatedRecipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
-        mergedRecipeModule.setProtein(recipeModule.getProtein() + generatedRecipeModule.getProtein() + recipe.getProtein_g());
+        mergedRecipeModule.setFat(recipeModule.getFat() + recipe.getFat_g());
+        mergedRecipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
+        mergedRecipeModule.setProtein(recipeModule.getProtein() + recipe.getProtein_g());
 
         double allModules = mergedRecipeModule.getCarbohydrate() + mergedRecipeModule.getProtein() + mergedRecipeModule.getFat();
         double percentageCarbohydrate = mergedRecipeModule.getCarbohydrate() / allModules;
@@ -122,26 +101,52 @@ public class RecipeServiceImpl implements RecipeService {
      * Generated all recipes except the last one
      *
      * @param cal
-     * @param recipesToGenerate Number of recipes to generate starting by 1
+     * @param recipesToGenerate Number of recipes to generate
      * @return
      */
     private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
-        double averageCalPerRecipe = (double) ((cal / recipesToGenerate) - 50);
-        for (int i = 0; i < recipesToGenerate - usedRecipes.size(); i++) {
+        double averageCalPerRecipe = (double) ((cal / recipesToGenerate));
+        List<Recipe> recipesInRange = new ArrayList<>();
+        while (generatedRecipes.size() + usedRecipes.size() < recipesToGenerate) {
             int randomCal = random.nextInt(70);
-            List<Recipe> recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe + randomCal - 15, (int) averageCalPerRecipe + randomCal + 15);
-            int randomIndex = random.nextInt(recipesInRange.size());
-            Recipe recipe = recipesInRange.get(randomIndex);
-            if (usedRecipes.contains(recipe)) {
-                System.out.println("Dublicated recipe found!");
-                i--;
-                continue;
+            if (recipesInRange.size() == 0) {
+                recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe - randomCal, (int) averageCalPerRecipe + randomCal);
+                recipesInRange.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
+                if (recipesInRange.size() == 0) {
+                    System.out.println("PROBLEM!");
+                    recipesInRange = this.recipeRepository.getLowerThanRecipes((int) averageCalPerRecipe + randomCal - 25);
+                    recipesInRange.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
+                    if (recipesInRange.size() != 0) {
+                        generatedRecipes.add(recipesInRange.get(0));
+                        recipesInRange.clear();
+                        continue;
+                    } else {
+                        return recipesInRange;
+                    }
+                }
             }
-            generatedRecipes.add(recipe);
+            int randomIndex = random.nextInt(recipesInRange.size());
+            generatedRecipes.add(recipesInRange.get(randomIndex));
+            recipesInRange.clear();
         }
-
         return generatedRecipes;
     }
+
+    private List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
+        List<Recipe> allRecipes = this.recipeRepository.getAll(random.nextInt(50) * 50, 50);
+        List<Recipe> randomList = new ArrayList<>();
+        if (numberOfRecipes.orElse(5) < allRecipes.size()) {
+            Random random = new Random();
+            for (int i = 0; i < numberOfRecipes.orElse(5); i++) {
+                int index = random.nextInt(allRecipes.size());
+                randomList.add(allRecipes.get(index));
+            }
+        } else {
+            randomList = allRecipes;
+        }
+        return randomList;
+    }
+
 
 }

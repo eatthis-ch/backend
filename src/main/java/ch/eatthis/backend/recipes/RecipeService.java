@@ -13,8 +13,6 @@ public interface RecipeService {
 
     Recipe getById(String id);
 
-    List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes);
-
     String castToString(String[] a);
 
 }

@@ -15,7 +15,7 @@ public class Recipe {
 
     @Id
     private String id;
-    private String title, description, image_id, ingredients, procedure;
+    private String title, description, image_id, ingredients, procedure, source;
     private int energy_cal, protein_g, fat_g, carbohydrate_g;
 
 }
