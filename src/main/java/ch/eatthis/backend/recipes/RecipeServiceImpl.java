@@ -24,16 +24,10 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes, int calories) {
         int recipesNumber = numberOfRecipes.orElse(5);
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
-        System.out.println();
         if (recipesNumber <= usedRecipes.size()) {
             return new ArrayList<>();
         }
-        List<Recipe> generatedRecipes = this.generateRecipes(calories, recipesNumber, usedRecipes);
-        List<Recipe> mergedRecipes = generatedRecipes;
-        mergedRecipes.addAll(usedRecipes);
-        RecipeModule recipeModule = new RecipeModule(mergedRecipes);
-
-        return generatedRecipes;
+        return this.generateRecipes(calories, recipesNumber, usedRecipes);
     }
 
     @Override
@@ -113,28 +107,28 @@ public class RecipeServiceImpl implements RecipeService {
     private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate));
-        List<Recipe> recipesInGeneratedRanged = new ArrayList<>();
+        List<Recipe> recipesInRange = new ArrayList<>();
         while (generatedRecipes.size() + usedRecipes.size() < recipesToGenerate) {
             int randomCal = random.nextInt(70);
-            if (recipesInGeneratedRanged.size() == 0) {
-                recipesInGeneratedRanged = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe - randomCal, (int) averageCalPerRecipe + randomCal);
-                recipesInGeneratedRanged.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
-                if (recipesInGeneratedRanged.size() == 0) {
+            if (recipesInRange.size() == 0) {
+                recipesInRange = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe - randomCal, (int) averageCalPerRecipe + randomCal);
+                recipesInRange.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
+                if (recipesInRange.size() == 0) {
                     System.out.println("PROBLEM!");
-                    recipesInGeneratedRanged = this.recipeRepository.getLowerThanRecipes((int) averageCalPerRecipe + randomCal - 25);
-                    recipesInGeneratedRanged.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
-                    if (recipesInGeneratedRanged.size() != 0) {
-                        generatedRecipes.add(recipesInGeneratedRanged.get(0));
-                        recipesInGeneratedRanged.clear();
+                    recipesInRange = this.recipeRepository.getLowerThanRecipes((int) averageCalPerRecipe + randomCal - 25);
+                    recipesInRange.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
+                    if (recipesInRange.size() != 0) {
+                        generatedRecipes.add(recipesInRange.get(0));
+                        recipesInRange.clear();
                         continue;
                     } else {
-                        return recipesInGeneratedRanged;
+                        return recipesInRange;
                     }
                 }
             }
-            int randomIndex = random.nextInt(recipesInGeneratedRanged.size());
-            generatedRecipes.add(recipesInGeneratedRanged.get(randomIndex));
-            recipesInGeneratedRanged.clear();
+            int randomIndex = random.nextInt(recipesInRange.size());
+            generatedRecipes.add(recipesInRange.get(randomIndex));
+            recipesInRange.clear();
         }
         return generatedRecipes;
     }
