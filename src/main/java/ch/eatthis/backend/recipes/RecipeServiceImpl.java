@@ -2,8 +2,11 @@ package ch.eatthis.backend.recipes;
 
 import ch.eatthis.backend.recipes.model.Recipe;
 import ch.eatthis.backend.recipes.model.RecipeModule;
+import ch.eatthis.backend.recipes.model.RecipeModuleType;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,13 +31,14 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipesNumber <= usedRecipes.size()) {
             return new ArrayList<>();
         }
-        List<Recipe> generatedRecipes = this.generateRecipes(calories, recipesNumber, usedRecipes);
-        List<Recipe> mergedRecipes = generatedRecipes;
-        mergedRecipes.addAll(usedRecipes);
-        RecipeModule recipeModule = new RecipeModule(mergedRecipes);
-        while (!isInProportion(recipeModule) && generatedRecipes.size() + usedRecipes.size() != recipesNumber) {
-
+        List<Recipe> generatedRecipes = new ArrayList<>();
+        if (recipesNumber - usedRecipes.size() - 1 >= 1) {
+            generatedRecipes = generateRandomRecipes(calories, recipesNumber - 1, usedRecipes);
         }
+        List<Recipe> mergedRecipes = new ArrayList<>();
+        mergedRecipes.addAll(generatedRecipes);
+        mergedRecipes.addAll(usedRecipes);
+        generatedRecipes.add(generateLastRecipe(mergedRecipes, calories));
 
         return generatedRecipes;
     }
@@ -116,73 +120,12 @@ public class RecipeServiceImpl implements RecipeService {
         return true;
     }
 
-    /**
-     * Checks if the proportions are correct
-     *
-     * @param recipes
-     * @return Returns true if the proportions are correct and false if they aren't
-     */
-    private boolean isInProportion(List<Recipe> recipes) {
-        RecipeModule recipeModule = new RecipeModule(recipes);
-        return isInProportion(recipeModule);
-    }
-
-    private int calculateModuleDifference(RecipeModule usedRecipeModule, Recipe recipe) {
-        RecipeModule mergedRecipeModule = new RecipeModule();
-        mergedRecipeModule.setProtein(usedRecipeModule.getProtein() + recipe.getProtein_g());
-        mergedRecipeModule.setCarbohydrate(usedRecipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
-        mergedRecipeModule.setFat(usedRecipeModule.getFat() + recipe.getFat_g());
-
-        double allModules = mergedRecipeModule.getCarbohydrate() + mergedRecipeModule.getProtein() + mergedRecipeModule.getFat();
-        double percentageCarbohydrate = mergedRecipeModule.getCarbohydrate() / allModules;
-        double percentageFat = mergedRecipeModule.getFat() / allModules;
-        double percentageProtein = mergedRecipeModule.getProtein() / allModules;
-
-        double overAllDifference = 0;
-        if (percentageCarbohydrate < 0.45) {
-            // Calculate difference and add it to overAllDifference
-        } else if (percentageCarbohydrate > 0.55) {
-            // Calculate difference and add it to overAllDifference
-        }
-        return 0;
-    }
-
-    /**
-     * Generated all recipes except the last one
-     *
-     * @param cal
-     * @param recipesToGenerate Number of recipes to generate
-     * @return
-     */
-    private List<Recipe> generateRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
-        List<Recipe> generatedRecipes = new ArrayList<>();
-        if (recipesToGenerate - usedRecipes.size() - 1 >= 1) {
-            generatedRecipes = generateRandomRecipes(cal, recipesToGenerate, usedRecipes);
-        }
-        List<Recipe> mergedRecipes = new ArrayList<>();
-        mergedRecipes.addAll(generatedRecipes);
-        mergedRecipes.addAll(usedRecipes);
-        if (isInProportion(mergedRecipes)) {
-            return generatedRecipes;
-        } else {
-            RecipeModule recipeModule = new RecipeModule();
-            int availableCals = cal;
-            for (Recipe recipe : mergedRecipes) {
-                availableCals-= recipe.getEnergy_cal();
-                recipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
-                recipeModule.setFat(recipeModule.getFat() + recipe.getFat_g());
-                recipeModule.setProtein(recipeModule.getProtein() + recipe.getProtein_g());
-            }
-
-//            Recipe recipe = generatedRecipeForModule(availableCals, )
-        }
-        return generatedRecipes;
-    }
-
     private List<Recipe> generateRandomRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate));
         List<Recipe> recipesInGeneratedRanged = new ArrayList<>();
+        List<Recipe> mergedRecipes = new ArrayList<>();
+        mergedRecipes.addAll(usedRecipes);
         while (generatedRecipes.size() + usedRecipes.size() < recipesToGenerate) {
             int randomCal = random.nextInt(70);
             if (recipesInGeneratedRanged.size() == 0) {
@@ -194,6 +137,7 @@ public class RecipeServiceImpl implements RecipeService {
                     recipesInGeneratedRanged.removeIf(recipe -> usedRecipes.contains(recipe) || generatedRecipes.contains(recipe));
                     if (recipesInGeneratedRanged.size() != 0) {
                         generatedRecipes.add(recipesInGeneratedRanged.get(0));
+                        mergedRecipes.add(recipesInGeneratedRanged.get(0));
                         recipesInGeneratedRanged.clear();
                         continue;
                     } else {
@@ -203,40 +147,105 @@ public class RecipeServiceImpl implements RecipeService {
             }
             int randomIndex = random.nextInt(recipesInGeneratedRanged.size());
             generatedRecipes.add(recipesInGeneratedRanged.get(randomIndex));
+            mergedRecipes.add(recipesInGeneratedRanged.get(randomIndex));
             recipesInGeneratedRanged.clear();
+
+            if(generatedRecipes.size() + usedRecipes.size() == recipesToGenerate) {
+                double averageOfFatPercentage = 0D;
+                double averageOfProteinPercentage = 0D;
+                double averageOfCarbohydratePercentage = 0D;
+                for (Recipe recipe : mergedRecipes) {
+                    averageOfFatPercentage += recipe.getFat_percent();
+                    averageOfProteinPercentage += recipe.getProtein_percent();
+                    averageOfCarbohydratePercentage += recipe.getCarbohydrate_percent();
+                }
+                averageOfFatPercentage = averageOfFatPercentage / mergedRecipes.size();
+                averageOfProteinPercentage = averageOfProteinPercentage / mergedRecipes.size();
+                averageOfCarbohydratePercentage = averageOfCarbohydratePercentage / mergedRecipes.size();
+                if (!(isInPercentageRange(RecipeModuleType.FAT, averageOfFatPercentage, 0.1) &&
+                        isInPercentageRange(RecipeModuleType.PROTEIN, averageOfProteinPercentage, 0.1) &&
+                        isInPercentageRange(RecipeModuleType.CARBOHYDRATE, averageOfCarbohydratePercentage, 0.1))) {
+                    generatedRecipes.clear();
+                    mergedRecipes.clear();
+                    mergedRecipes.addAll(usedRecipes);
+                }
+            }
         }
         return generatedRecipes;
     }
 
-    private Recipe generatedRecipeForModule(int cal, RecipeModule usedRecipeModule) {
-        int randomCal = random.nextInt(70);
-        List<Recipe> repositoryRecipes = this.recipeRepository.getRecipeBetweenCalRange(cal - randomCal, cal + randomCal);
-        Recipe bestResult = null;
-        int currentMinimalDifference = 0;
-        for (Recipe recipe : repositoryRecipes) {
-            if (isInProportion(usedRecipeModule, recipe)) {
-                return recipe;
-            } else {
-
-            }
+    private Recipe generateLastRecipe(List<Recipe> utilizedRecipes, int cal) {
+        int usedCal = 0;
+        double sumOfFatPercentage = 0D;
+        double sumOfProteinPercentage = 0D;
+        double sumOfCarbohydratePercentage = 0D;
+        for (Recipe recipe : utilizedRecipes) {
+            usedCal+= recipe.getEnergy_cal();
+            sumOfFatPercentage += recipe.getFat_percent();
+            sumOfProteinPercentage += recipe.getProtein_percent();
+            sumOfCarbohydratePercentage += recipe.getCarbohydrate_percent();
         }
-        return bestResult;
+        if (usedCal >= cal) {
+            throw new RuntimeException("ERROR System.100");
+        }
+        int availableCal = cal - usedCal;
+        double searchingFatPercent = calculateNeededPercentage(RecipeModuleType.FAT, sumOfFatPercentage, utilizedRecipes.size());
+        double searchingProteinPercent = calculateNeededPercentage(RecipeModuleType.PROTEIN, sumOfProteinPercentage, utilizedRecipes.size());
+        double searchingCarbPercent = calculateNeededPercentage(RecipeModuleType.CARBOHYDRATE, sumOfCarbohydratePercentage, utilizedRecipes.size());
+        double percentRange = 0.05D;
+        List<Recipe> queriedRecipes = this.recipeRepository.getDefinedRecipes(availableCal, random.nextInt(70), searchingFatPercent, searchingProteinPercent, searchingCarbPercent, percentRange);
+        queriedRecipes.removeIf(utilizedRecipes::contains);
+        while (queriedRecipes.size() == 0) {
+            percentRange += 0.05D;
+            queriedRecipes = this.recipeRepository.getDefinedRecipes(availableCal, random.nextInt(70), searchingFatPercent, searchingProteinPercent, searchingCarbPercent, percentRange);
+        }
+        return queriedRecipes.get(random.nextInt(queriedRecipes.size()));
     }
 
-    private List<Recipe> getNumberOfRecipes(Optional<Integer> numberOfRecipes) {
-        List<Recipe> allRecipes = this.recipeRepository.getAll(random.nextInt(50) * 50, 50);
-        List<Recipe> randomList = new ArrayList<>();
-        if (numberOfRecipes.orElse(5) < allRecipes.size()) {
-            Random random = new Random();
-            for (int i = 0; i < numberOfRecipes.orElse(5); i++) {
-                int index = random.nextInt(allRecipes.size());
-                randomList.add(allRecipes.get(index));
-            }
-        } else {
-            randomList = allRecipes;
+    private double calculateNeededPercentage(RecipeModuleType recipeModuleType, double sumOfPercentage, int countRecipes) {
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        switch (recipeModuleType) {
+            case FAT:
+                return percentageIsBetween(0.3D, 0.35D, sumOfPercentage, countRecipes, df);
+            case PROTEIN:
+                return percentageIsBetween(0.1D, 0.2D, sumOfPercentage, countRecipes, df);
+            case CARBOHYDRATE:
+                return percentageIsBetween(0.45D, 0.55D, sumOfPercentage, countRecipes, df);
+            default:
+                return 0D;
         }
-        return randomList;
     }
 
+    private double percentageIsBetween(double lowerValue, double higherValue, double sumOfPercentage, int countRecipes) {
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return percentageIsBetween(lowerValue, higherValue, sumOfPercentage, countRecipes, df);
+    }
 
+    private double percentageIsBetween(double lowerValue, double higherValue, double sumOfPercentage, int countRecipes, DecimalFormat decimalFormat) {
+        double startValue = 0D;
+        for (int i = 0; i < 1000; i++) {
+            double currentPercent = sumOfPercentage + startValue / countRecipes + 1;
+            currentPercent = Double.parseDouble(decimalFormat.format(currentPercent));
+            if (Math.abs(lowerValue - currentPercent) == Math.abs(higherValue - currentPercent)) {
+                return startValue;
+            }
+            startValue += 0.01D;
+        }
+        return 0D;
+    }
+
+    private boolean isInPercentageRange(RecipeModuleType recipeModuleType, double percentage, double difference) {
+        switch (recipeModuleType) {
+            case FAT:
+                return percentage >= 0.3D - difference || percentage <= 0.35D + difference;
+            case PROTEIN:
+                return percentage >= 0.1D - difference || percentage <= 0.2D + difference;
+            case CARBOHYDRATE:
+                return percentage >= 0.45D - difference || percentage <= 0.55D + difference;
+            default:
+                return false;
+        }
+    }
 }

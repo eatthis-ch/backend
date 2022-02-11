@@ -38,4 +38,18 @@ public class RecipeRepository {
     public List<Recipe> getLowerThanRecipes(int cal) {
         return this.template.query(RecipeQueries.getLowerThanRecipes, new MapSqlParameterSource("cal_value", cal), new RecipeMapper());
     }
+
+    public List<Recipe> getDefinedRecipes(int cal, int calRange, double fatPercent, double proteinPercent, double carbPercent, double percentRange) {
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        mapSqlParameterSource.addValue("lowerCal", cal - calRange);
+        mapSqlParameterSource.addValue("higherCal", cal + calRange);
+        mapSqlParameterSource.addValue("lowerProtein", proteinPercent - percentRange);
+        mapSqlParameterSource.addValue("higherProtein", proteinPercent + percentRange);
+        mapSqlParameterSource.addValue("lowerFat", fatPercent - percentRange);
+        mapSqlParameterSource.addValue("higherFat", fatPercent + percentRange);
+        mapSqlParameterSource.addValue("lowerCarb", carbPercent - percentRange);
+        mapSqlParameterSource.addValue("higherCarb", carbPercent + percentRange);
+        return this.template.query(RecipeQueries.getDefinedRecipes, mapSqlParameterSource, new RecipeMapper());
+
+    }
 }
