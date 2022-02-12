@@ -27,13 +27,12 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> generateRecipes(Optional<String[]> usedRecipesArray, Optional<Integer> numberOfRecipes, int calories) {
         int recipesNumber = numberOfRecipes.orElse(5);
         List<Recipe> usedRecipes = usedRecipesArray.map(this::getUsedRecipes).orElseGet(ArrayList::new);
-        System.out.println();
         if (recipesNumber <= usedRecipes.size()) {
             return new ArrayList<>();
         }
         List<Recipe> generatedRecipes = new ArrayList<>();
         if (recipesNumber - usedRecipes.size() - 1 >= 1) {
-            generatedRecipes = generateRandomRecipes((int) (calories / recipesNumber) * (recipesNumber - 1), recipesNumber - 1, usedRecipes);
+            generatedRecipes = generateRandomRecipes((int) (calories / recipesNumber) * (recipesNumber - 1), recipesNumber - usedRecipes.size() - 1, usedRecipes);
         }
         List<Recipe> mergedRecipes = new ArrayList<>();
         mergedRecipes.addAll(generatedRecipes);
@@ -126,7 +125,7 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> recipesInGeneratedRanged = new ArrayList<>();
         List<Recipe> mergedRecipes = new ArrayList<>();
         mergedRecipes.addAll(usedRecipes);
-        while (generatedRecipes.size() + usedRecipes.size() < recipesToGenerate) {
+        while (generatedRecipes.size() < recipesToGenerate) {
             int randomCal = random.nextInt(70);
             if (recipesInGeneratedRanged.size() == 0) {
                 recipesInGeneratedRanged = this.recipeRepository.getRecipeBetweenCalRange((int) averageCalPerRecipe - randomCal, (int) averageCalPerRecipe + randomCal);
@@ -150,7 +149,7 @@ public class RecipeServiceImpl implements RecipeService {
             mergedRecipes.add(recipesInGeneratedRanged.get(randomIndex));
             recipesInGeneratedRanged.clear();
 
-            if(generatedRecipes.size() + usedRecipes.size() == recipesToGenerate) {
+            if(generatedRecipes.size() == recipesToGenerate) {
                 System.out.println("TEST");
                 double averageOfFatPercentage = 0D;
                 double averageOfProteinPercentage = 0D;
