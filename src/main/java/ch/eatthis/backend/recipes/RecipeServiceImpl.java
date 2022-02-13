@@ -88,21 +88,6 @@ public class RecipeServiceImpl implements RecipeService {
      * Checks if the proportions are correct
      *
      * @param recipeModule
-     * @param recipe
-     * @return Returns true if the proportions are correct and false if they aren't
-     */
-    private boolean isInProportion(RecipeModule recipeModule, Recipe recipe) {
-        RecipeModule mergedRecipeModule = new RecipeModule();
-        mergedRecipeModule.setFat(recipeModule.getFat() + recipe.getFat_g());
-        mergedRecipeModule.setCarbohydrate(recipeModule.getCarbohydrate() + recipe.getCarbohydrate_g());
-        mergedRecipeModule.setProtein(recipeModule.getProtein() + recipe.getProtein_g());
-        return isInProportion(mergedRecipeModule);
-    }
-
-    /**
-     * Checks if the proportions are correct
-     *
-     * @param recipeModule
      * @return Returns true if the proportions are correct and false if they aren't
      */
     private boolean isInProportion(RecipeModule recipeModule) {
@@ -150,7 +135,6 @@ public class RecipeServiceImpl implements RecipeService {
             recipesInGeneratedRanged.clear();
 
             if(generatedRecipes.size() == recipesToGenerate) {
-                System.out.println("TEST");
                 double averageOfFatPercentage = 0D;
                 double averageOfProteinPercentage = 0D;
                 double averageOfCarbohydratePercentage = 0D;
