@@ -31,11 +31,7 @@ public class RecipeController {
         usedRecipes.ifPresent(strings -> System.out.println(this.recipeService.castToString(strings)));
         System.out.println(calories);
         List<Recipe> generatedRecipes = this.recipeService.generateRecipes(usedRecipes, numberOfRecipes, calories);
-        int cal = 0;
-        for (Recipe recipe : generatedRecipes) {
-            cal+= recipe.getEnergy_cal();
-        }
-        System.out.println("Final cal: " + cal);
+        this.recipeService.outputMenuInformation(generatedRecipes);
         return generatedRecipes;
     }
 

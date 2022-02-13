@@ -20,6 +20,9 @@ public class RecipeMapper implements RowMapper<Recipe> {
                 rs.getInt("energy_cal"),
                 rs.getInt("protein_g"),
                 rs.getInt("fat_g"),
-                rs.getInt("carbohydrate_g"));
+                rs.getInt("carbohydrate_g"),
+                rs.getDouble("fat_percent"),
+                rs.getDouble("protein_percent"),
+                rs.getDouble("carbohydrate_percent"));
     }
 }

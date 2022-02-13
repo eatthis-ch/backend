@@ -26,4 +26,12 @@ public class RecipeModule {
             fat=+ recipe.getFat_g();
         }
     }
+
+    public int getDifference(Recipe recipe) {
+        int difference = 0;
+        difference+= Math.abs(protein - recipe.getProtein_g());
+        difference+= Math.abs(carbohydrate - recipe.getCarbohydrate_g());
+        difference+= Math.abs(fat - recipe.getFat_g());
+        return difference;
+    }
 }

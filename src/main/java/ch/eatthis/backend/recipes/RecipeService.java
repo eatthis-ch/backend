@@ -15,4 +15,6 @@ public interface RecipeService {
 
     String castToString(String[] a);
 
+    void outputMenuInformation(List<Recipe> recipes);
+
 }
