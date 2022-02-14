@@ -1,5 +1,6 @@
 package ch.eatthis.backend.recipes;
 
+import ch.eatthis.backend.exceptions.NoCalsFreeException;
 import ch.eatthis.backend.recipes.model.Recipe;
 import ch.eatthis.backend.recipes.model.RecipeModule;
 import ch.eatthis.backend.recipes.model.RecipeModuleType;
@@ -31,8 +32,12 @@ public class RecipeServiceImpl implements RecipeService {
             return new ArrayList<>();
         }
         List<Recipe> generatedRecipes = new ArrayList<>();
+        int usedCalories = 0;
+        for (Recipe recipe : usedRecipes) {
+            usedCalories += recipe.getEnergy_cal();
+        }
         if (recipesNumber - usedRecipes.size() - 1 >= 1) {
-            generatedRecipes = generateRandomRecipes((int) (calories / recipesNumber) * (recipesNumber - 1), recipesNumber - usedRecipes.size() - 1, usedRecipes);
+            generatedRecipes = generateRandomRecipes((int) ((calories - usedCalories) / (recipesNumber - usedRecipes.size())) * (recipesNumber - usedRecipes.size() - 1), recipesNumber - usedRecipes.size() - 1, usedRecipes);
         }
         List<Recipe> mergedRecipes = new ArrayList<>();
         mergedRecipes.addAll(generatedRecipes);
@@ -105,6 +110,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private List<Recipe> generateRandomRecipes(int cal, int recipesToGenerate, List<Recipe> usedRecipes) {
+        System.out.println("Needed " + cal + " recipes: " + recipesToGenerate);
         List<Recipe> generatedRecipes = new ArrayList<>();
         double averageCalPerRecipe = (double) ((cal / recipesToGenerate));
         List<Recipe> recipesInGeneratedRanged = new ArrayList<>();
@@ -171,7 +177,7 @@ public class RecipeServiceImpl implements RecipeService {
             sumOfCarbohydratePercentage += recipe.getCarbohydrate_percent();
         }
         if (usedCal >= cal) {
-            throw new RuntimeException("ERROR System.100");
+            throw new NoCalsFreeException();
         }
         int availableCal = cal - usedCal;
         double searchingFatPercent = calculateNeededPercentage(RecipeModuleType.FAT, sumOfFatPercentage, utilizedRecipes.size());
@@ -251,5 +257,25 @@ public class RecipeServiceImpl implements RecipeService {
         }
         double allModules = allFat + allProtein + allCarb;
         System.out.println("Final cal: " + cal + " fat: " + allFat / allModules + " protein: " + allProtein / allModules + " Carb: " + allCarb / allModules);
+    }
+
+    private double getModuleSumUpPercent(RecipeModuleType recipeModuleType, List<Recipe> recipes) {
+        double sum = 0;
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        for (Recipe recipe : recipes) {
+            switch (recipeModuleType) {
+                case FAT:
+                    sum += recipe.getFat_percent();
+                    break;
+                case PROTEIN:
+                    sum += recipe.getProtein_g();
+                    break;
+                case CARBOHYDRATE:
+                    sum += recipe.getCarbohydrate_g();
+                    break;
+            }
+        }
+        return Double.parseDouble(df.format(sum));
     }
 }
