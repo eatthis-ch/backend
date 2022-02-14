@@ -191,7 +191,7 @@ public class RecipeServiceImpl implements RecipeService {
         queriedRecipes.removeIf(utilizedRecipes::contains);
         while (queriedRecipes.size() == 0) {
             percentRange += 0.04D;
-            randomNumber += 70;
+            randomNumber += 30;
             queriedRecipes = this.recipeRepository.getDefinedRecipes(availableCal, random.nextInt(randomNumber), searchingFatPercent, searchingProteinPercent, searchingCarbPercent, percentRange);
         }
         return queriedRecipes.get(random.nextInt(queriedRecipes.size()));
