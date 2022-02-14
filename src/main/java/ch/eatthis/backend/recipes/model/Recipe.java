@@ -17,5 +17,6 @@ public class Recipe {
     private String id;
     private String title, description, image_id, ingredients, procedure, source;
     private int energy_cal, protein_g, fat_g, carbohydrate_g;
+    private double fat_percent, protein_percent, carbohydrate_percent;
 
 }
